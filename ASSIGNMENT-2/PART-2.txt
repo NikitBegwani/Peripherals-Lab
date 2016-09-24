@@ -1,0 +1,78 @@
+//         Initial Configuration
+START:	   MVI A,8B
+	   OUT 43
+//         End Initial Configuration
+
+	   MVI A,01
+	   STA 8000
+	   OUT 40 //To denote elevator currently on ground floor
+
+//Begin is sub routine which busy waits for any upper floor go high
+BEGIN:	   MVI A,01
+	   STA 8000  //Store the position of current floor at Address: 8000
+	   IN 41
+	   CPI 00    // Check if there is no high bit in input : Repeat Else: go to that floor
+	   JZ BEGIN
+	   CALL UP
+
+UP:	   LDA 8000
+	   MOV D,A
+	   IN 41    //Take the input in Accumulator   
+	   CMP D    //Compare if we are on a floor higher then those shown in input
+	   JZ DOWN  // If the person at the highest floor has been taken and the bit for that floor is low then Start Going Down
+	   LDA 8000 //Else Check if you have to go up by loading current floor from address 8000
+ 	   MOV D,A
+	   IN 41
+	   ANA D
+	   JZ GOUP //If there is a call from above floor go up
+	   JNZ UP  //Else wait until either the call for present floor ends or there is a call from above floor
+
+//Sub Routine to go up by one floor
+GOUP:	   LDA 8000
+	   RLC // Left Rotates the 8-bit number i.e. the position of current floor to go one floor higher i.e. 00000001 -> 00000010
+	   STA 8000
+	   OUT 40
+	   CALL DELAY
+	   CALL DELAY
+	   CALL UP
+
+DOWN:	   LDA 8000
+	   MOV D,A
+	   IN 41
+	   ANA D
+	   JZ GODOWN
+	   JNZ DOWN
+
+
+//Sub Routine to go down by one floor
+GODOWN:	   LDA 8000
+	   RRC       // Right Rotates the 8-bit number i.e. the position of current floor to go one floor lower i.e. 00000010 -> 00000001
+	   STA 8000  
+	   OUT 40
+	   LDA 8000
+	   CPI 01    //Check if we have reached ground floor
+	   JZ BEGIN  //If yes jump back to Start of the program and wait for a call for elevator
+	   CALL DELAY
+	   CALL DELAY
+	   CALL DOWN
+
+//Sub Routine to terminate the program
+EXIT:	   RST 5
+
+
+//SubRoutine to cause a delay of 0.5 seconds
+DELAY:	   LXI D,FF00
+
+DLOOP:	   DCX D
+	   MOV A,D
+	   ORA E
+	   JNZ DLOOP
+	   RET
+
+MINORDELAY:	   LXI D,F000
+
+DLOOP:	   DCX D
+	   MOV A,D
+	   ORA E
+	   JNZ DLOOP
+	   RET

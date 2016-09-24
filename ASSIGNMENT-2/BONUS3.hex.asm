@@ -1,0 +1,101 @@
+
+START:	   MVI A,8B
+	   OUT 43
+	   MVI A,01
+	   STA 8000
+	   OUT 40
+
+BEGIN:	   MVI A,01
+	   STA 8000
+	   IN 41
+	   CPI 00
+	   JZ BEGIN
+	   CALL UP
+
+UP:	   LDA 8000
+	   MOV D,A
+	   IN 41
+	   ANI 80
+	   JNZ TAKEBOSS
+	   IN 41
+	   CMP D
+	   JZ DOWN
+	   LDA 8000
+	   MOV D,A
+	   IN 41
+	   ANA D
+	   JZ GOUP
+	   JNZ UP
+
+GOUP:	   LDA 8000
+	   RLC
+	   STA 8000
+	   OUT 40
+	   CALL DELAY
+	   CALL DELAY
+	   CALL UP
+
+DOWN:	   IN 41
+	   ANI 80
+	   JNZ TAKEBOSS
+	   LDA 8000
+	   MOV D,A
+	   IN 41
+	   ANA D
+	   JZ GODOWN
+	   JNZ DOWN
+
+GODOWN:	   LDA 8000
+	   RRC
+	   STA 8000
+	   OUT 40
+	   LDA 8000
+	   CPI 01
+	   JZ BEGIN
+	   CALL DELAY
+	   CALL DELAY
+	   CALL DOWN
+
+EXIT:	   RST 5
+
+DELAY:	   LXI D,FF00
+
+DLOOP:	   DCX D
+	   MOV A,D
+	   ORA E
+	   JNZ DLOOP
+	   RET
+
+TAKEBOSS:	   LDA 8000
+	   ANI 80
+	   JNZ BOSSTAKEN
+	   LDA 8000
+	   RLC
+	   STA 8000
+	   OUT 40
+	   CALL DELAY
+	   CALL DELAY
+	   CALL TAKEBOSS
+
+BOSSTAKEN:	   IN 41
+	   ANI 80
+	   JZ TAKEBOSSDOWN
+	   JNZ BOSSTAKEN
+
+TAKEBOSSDOWN:
+                        LDA 8000
+	   RRC
+	   STA 8000
+	   OUT 40
+	   LDA 8000
+	   CPI 01
+	   JZ BEGIN
+	   CALL DELAY
+	   CALL DELAY
+                            CALL TAKEBOSSDOWN    
+
+DLOOP:	   DCX D
+	   MOV A,D
+	   ORA E
+	   JNZ DLOOP
+	   RET

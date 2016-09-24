@@ -1,0 +1,29 @@
+Assignment 4
+
+Part 1 (ADC to convert the analog voltage to digital)
+
+1. Load the hex file of part 1 to memory location 8000 to run the program
+2. The program reads the analog value through ADC and stores the digital value in location 8701
+3. This value is displayed on the LED of mps 85-3
+4. Value ranges from 00 to FF in hexadecimal
+
+Part 3 (rotate the stepper according to value of conversion from ADC)
+
+1. Load the hex file of part 2 to the memory location 8000
+2. The analog value should be given before running the program
+3. This program reads the analog value at the time of code compilation
+4. And rotates the motor according to the formula 1.8 * digital value / 2
+5. Once the motor rotates according to the converted value, the program exits
+
+Part 2 + bonus (control the RPM according to the analog value and also calculate the rpm)
+
+1. Load the hex file of part 3 to the memory location 8000
+2. The program reads the analog value from the ADC and the controls the RPM of the motor accordingly.
+3. This is done by varying the delay between two ticks of the motor according to the digital value
+4. This delay vary according to hyperbolic function 4000 / digital value
+5. i.e. more the value read, less is the delay
+6. To calculate the RPM, the number of ticks of the motor, i.e. number of 1.8 degree rotations is displayed on the LED display of the mps board
+7. When the RPM is to be caluculated, analog value should be kept constant
+8. Note the number of ticks at the start, t1
+9. Now manually check the time and note the number of ticks at the end of one minute, t2
+10. RPM of the motor is (t2-t1) * 1.8 / 360

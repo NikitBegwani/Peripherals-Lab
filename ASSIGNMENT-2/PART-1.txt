@@ -1,0 +1,48 @@
+//         Initial Configuration
+START:	   MVI A,8B
+	   OUT 43
+//         End Initial Configuration
+
+	   MVI A,01
+	   STA 8000  //To store the location of current blinking LED.
+	   OUT 40   
+
+BEGIN:	   IN 41
+	   CPI 02
+	   JZ EXIT
+	   CPI 20        //Check if D6 is true
+	   JZ LOOP       //If yes start blinking the LED's
+	   JNZ BEGIN
+
+//Sub Routine to add busy wait while D5 is true
+PAUSE:     IN 41 //Take the input
+	   CPI 02        //Compare if D2 is true
+	   JZ EXIT       //If Yes then Exit to keyboard
+	   CPI 20        //Check if D6 is true
+	   JZ LOOP       //If yes start blinking the LED's
+	   JNZ PAUSE
+
+//Sub Routine to rotate the LED's while D6 is true
+LOOP:	   IN 41    //Take the input
+	   CPI 02    //Compare if D2 is true
+	   JZ EXIT   //If Yes then Exit to keyboard
+	   CPI 10    //Check if D5 is true
+	   JZ PAUSE  //If yes pause the program until D5 becomes false
+	   LDA 8000
+	   RLC      // Left Rotates the 8-bit number cyclically i.e. 00000001 -> 00000010
+           STA 8000 //Store to address 8000
+	   OUT 40
+	   CALL DELAY
+           CALL DELAY
+	   CALL LOOP
+
+//Sub Routine to terminate the program
+EXIT:	  RST 3   //Exit to keyboard
+
+//SubRoutine to cause a delay of 0.5 seconds
+DELAY:	   LXI D,FF00
+DLOOP:	   DCX D
+	   MOV A,D
+	   ORA E
+	   JNZ DLOOP
+	   RET
